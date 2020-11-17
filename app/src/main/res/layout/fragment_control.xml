@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:foregroundTint="#E91E63"
+    tools:context=".MainActivity">
+
+    <ImageButton
+        android:id="@+id/playPauseButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:tint="@color/design_default_color_primary"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.50"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.50"
+        app:srcCompat="@drawable/ic_baseline_pause_24"
+        android:visibility="gone"
+        tools:visibility="visible"/>
+
+    <ImageButton
+        android:id="@+id/goRightButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="24dp"
+        android:background="@color/white"
+        android:tint="@color/design_default_color_primary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/playPauseButton"
+        app:layout_constraintTop_toBottomOf="@+id/playPauseButton"
+        app:srcCompat="@drawable/ic_baseline_arrow_forward_ios_24"
+        android:visibility="gone"
+        tools:visibility="visible"/>
+
+    <SeekBar
+        android:id="@+id/seekBar"
+        style="@style/Widget.AppCompat.SeekBar.Discrete"
+        android:layout_width="200dp"
+        android:layout_height="26dp"
+        android:min="1"
+        android:max="6"
+        android:progress="3"
+        android:progressTint="@color/design_default_color_primary"
+        android:thumbTint="@color/design_default_color_primary"
+        app:layout_constraintBottom_toTopOf="@+id/playPauseButton"
+        app:layout_constraintEnd_toEndOf="@+id/playPauseButton"
+        app:layout_constraintStart_toStartOf="@+id/playPauseButton"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="gone"
+        tools:visibility="visible"/>
+
+    <TextView
+        android:id="@+id/speedTitleTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Vitesse : "
+        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+        android:tint="@color/design_default_color_primary"
+        app:layout_constraintBottom_toTopOf="@+id/playPauseButton"
+        app:layout_constraintEnd_toEndOf="@+id/seekBar"
+        app:layout_constraintStart_toStartOf="@+id/seekBar"
+        app:layout_constraintTop_toBottomOf="@+id/seekBar"
+        android:visibility="gone"
+        tools:visibility="visible"/>
+
+    <TextView
+        android:id="@+id/speedTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="3"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+        android:tint="@color/design_default_color_primary"
+        app:layout_constraintBottom_toBottomOf="@+id/speedTitleTextView"
+        app:layout_constraintEnd_toEndOf="@+id/seekBar"
+        app:layout_constraintStart_toEndOf="@+id/speedTitleTextView"
+        app:layout_constraintTop_toTopOf="@+id/speedTitleTextView"
+        android:visibility="gone"
+        tools:visibility="visible"/>
+
+
+
+    <ImageButton
+        android:id="@+id/goLeftButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="32dp"
+        android:background="@color/white"
+        android:rotationY="180"
+        android:tint="@color/design_default_color_primary"
+        app:layout_constraintEnd_toStartOf="@+id/playPauseButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/playPauseButton"
+        app:srcCompat="@drawable/ic_baseline_arrow_forward_ios_24"
+        android:visibility="gone"
+        tools:visibility="visible"/>
+
+    <TextView
+        android:id="@+id/connectionStatusText"
+        android:layout_width="match_parent"
+        android:layout_height="65dpdp"
+        android:background="@drawable/bg_rounded_connected"
+        android:padding="16dp"
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="Connecté : monAppareil" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyle"
+        android:indeterminateTint="@color/yellow"
+        android:layout_width="80dp"
+        android:layout_height="83dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.33"
+        tools:visibility="gone"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

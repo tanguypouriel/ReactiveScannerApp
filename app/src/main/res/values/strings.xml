@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">ReactiveScannerApp</string>
+
+    <string name="refresh_string">Rafraîchir</string>
+
+    <string name="device_name_string">Nom : </string>
+
+    <string name="device_adress_title">Adresse :</string>
+
+    <string name="select_device_string">Veuillez sélectionner l\'appareil Scanner : </string>
+</resources>
