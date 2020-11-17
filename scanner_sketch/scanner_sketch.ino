@@ -10,35 +10,32 @@ enum State { RIGHT, LEFT, STOP};
 enum Actions { WANNA_GO_RIGHT, WANNA_GO_LEFT, WANNA_STOP, NO_ACTION };
 
 typedef struct{
-  int speed;
+  int mspeed;
   State state;
 } dataScanner;
 
 volatile Actions action;
+dataScanner mDataScanner{3, STOP};
 
-const byte InterruptPinStop;
-const byte InterruptPinRight;
-const byte InterruptPinLeft;
-const byte InterruptPinSpeed; //interrupt ? 
+const byte interruptPinStop = 1;
+const byte interruptPinRight= 2;
+const byte interruptPinLeft= 3;
+const byte interruptPinSpeed = 4; //interrupt ? 
 
 char messageReceived = '3';
 
 void setup() {
   
-  pinMode(InterruptPinStop, INPUT);
-  pinMode(InterruptPinRight, INPUT);
-  pinMode(InterruptPinLeft, INPUT);
-  pinMode(InterruptPinSpeed, INPUT);
+  pinMode(interruptPinStop, INPUT);
+  pinMode(interruptPinRight, INPUT);
+  pinMode(interruptPinLeft, INPUT);
+  pinMode(interruptPinSpeed, INPUT);
 
-  action = Actions.NO_ACTION;
+  action = NO_ACTION;
 
-  attachInterrupt(digitalPinToInterrupt(interruptPinStop), stopScanner(), RISING);
-  attachInterrupt(digitalPinToInterrupt(interruptPinRight), rightScanner(), RISING);
-  attachInterrupt(digitalPinToInterrupt(interruptPinStop), leftScanner(), RISING);
-
-  dataScanner mDataScanner;
-  mDataScanner.mspeed = 3;
-  mDataScanner.state = State.STOP;
+  attachInterrupt(interruptPinStop, stopScanner, RISING);
+  attachInterrupt(interruptPinRight, rightScanner, RISING);
+  attachInterrupt(interruptPinStop, leftScanner, RISING);
 
   SerialBT.begin("Scanner"); //Bluetooth device name
 }
@@ -47,38 +44,36 @@ void loop() {
 
   switch(action){
     
-    Actions.WANNA_GO_RIGHT:
+    case WANNA_GO_RIGHT:
       SerialBT.write('A');
       // mettre moteur à droite
-      mDataScanner.state = State.RIGHT;
+      mDataScanner.state = RIGHT;
       break;
       
-    Actions.WANNA_GO_LEFT:
+    case WANNA_GO_LEFT:
       SerialBT.write('B');
       //mettre le moteur à gauche 
-      mDataScanner.state = State.LEFT;
+      mDataScanner.state = LEFT;
       break;
       
-    Actions.WANNA_GO_STOP:
+    case WANNA_STOP:
       SerialBT.write('C');
       //arreter le moteur
-      mDataScanner.state = State.STOP;
+      mDataScanner.state = STOP;
       break;
       
-    default:
-      //ne rien faire
   }
 
   if ( boutdeCourseDroit ) {
     SerialBT.write('D');
     //arreter le moteur
-    mDataScanner.state = State.STOP;
+    mDataScanner.state = STOP;
   }
 
   if ( boutdeCourseGauche ) {
     SerialBT.write('E');
     //arreter le moteur
-    mDataScanner.state = State.STOP;
+    mDataScanner.state = STOP;
   }
 
   if ( SerialBT.available() ) {
@@ -87,53 +82,49 @@ void loop() {
 
     switch(messageReceived){
 
-    'A': 
+    case 'A': 
       //aller à droite
-      mDataScanner.state = State.RIGHT;
+      mDataScanner.state = RIGHT;
       break;
 
-    'B':
+    case 'B':
       //aller à gauche
-      mDataScanner.state = State.LEFT;
+      mDataScanner.state = LEFT;
       break;
 
-    'C':
+    case 'C':
       //stoper
-      mDataScanner.state = State.STOP;
+      mDataScanner.state = STOP;
 
-    '1':
+    case '1':
       //passer la vitesse à 1
       mDataScanner.mspeed = 1;
       break;
 
-    '2':
+    case '2':
       //passer la vitesse à 2
       mDataScanner.mspeed = 2;
       break;
 
-    '3':
+    case '3':
       //passer la vitesse à 3
       mDataScanner.mspeed = 3;
       break;
 
-    '4':
+    case '4':
       //passer la vitesse à 4
       mDataScanner.mspeed = 4;
       break;
 
-    '5':
+    case '5':
       //passer la vitesse à 5
       mDataScanner.mspeed = 5;
       break;
 
-
-    '6':
+    case '6':
       //passer la vitesse à 6
       mDataScanner.mspeed = 6;
       break;
-
-    default: 
-      //erreur
       
     }
     
@@ -143,13 +134,13 @@ void loop() {
 }
 
 void stopScanner(){
-  action = Actions.WANNA_STOP;
+  action = WANNA_STOP;
 }
 
 void rightScanner(){
-  action = Actions.WANNA_GO_RIGHT;
+  action = WANNA_GO_RIGHT;
 }
 
 void leftScanner(){
-  action = Actions.WANNA_GO_LEFT;
+  action = WANNA_GO_LEFT;
 }

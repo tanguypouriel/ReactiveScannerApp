@@ -108,7 +108,7 @@ class ControlFragment : Fragment() {
         return binding.root
     }
 
-    @SuppressLint("ResourceAsColor")
+    
     fun onConnectionStatus(connectionStatus : ConnectionStatus){
         when (connectionStatus){
 
