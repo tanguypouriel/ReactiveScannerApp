@@ -10,7 +10,7 @@ enum State { RIGHT, LEFT, STOP};
 enum Actions { WANNA_GO_RIGHT, WANNA_GO_LEFT, WANNA_STOP, NO_ACTION };
 
 typedef struct{
-  int mspeed;
+  int mSpeed;
   State state;
 } dataScanner;
 
@@ -20,9 +20,16 @@ dataScanner mDataScanner{3, STOP};
 const byte interruptPinStop = 1;
 const byte interruptPinRight= 2;
 const byte interruptPinLeft= 3;
-const byte interruptPinSpeed = 4; //interrupt ? 
+const byte interruptPinSpeed = 4; //interrupt ?
+
+const byte pinMotorPWM = 5;
+const byte pinMotor1 = 6;
+const byte pinMotor2 = = 7;
+ 
 
 char messageReceived = '3';
+
+const int speedTab[] = {50, 91, 132, 173, 214, 255};
 
 void setup() {
   
@@ -46,19 +53,19 @@ void loop() {
     
     case WANNA_GO_RIGHT:
       SerialBT.write('A');
-      // mettre moteur à droite
+      motorGoRight();
       mDataScanner.state = RIGHT;
       break;
       
     case WANNA_GO_LEFT:
       SerialBT.write('B');
-      //mettre le moteur à gauche 
+      motorGoLeft(); 
       mDataScanner.state = LEFT;
       break;
       
     case WANNA_STOP:
       SerialBT.write('C');
-      //arreter le moteur
+      motorStop();
       mDataScanner.state = STOP;
       break;
       
@@ -66,13 +73,13 @@ void loop() {
 
   if ( boutdeCourseDroit ) {
     SerialBT.write('D');
-    //arreter le moteur
+    motorStop();
     mDataScanner.state = STOP;
   }
 
   if ( boutdeCourseGauche ) {
     SerialBT.write('E');
-    //arreter le moteur
+    motorStop();
     mDataScanner.state = STOP;
   }
 
@@ -83,47 +90,41 @@ void loop() {
     switch(messageReceived){
 
     case 'A': 
-      //aller à droite
+      motorGoRight();
       mDataScanner.state = RIGHT;
       break;
 
     case 'B':
-      //aller à gauche
+      motorGoLeft();
       mDataScanner.state = LEFT;
       break;
 
     case 'C':
-      //stoper
+      motorStop();
       mDataScanner.state = STOP;
 
     case '1':
-      //passer la vitesse à 1
-      mDataScanner.mspeed = 1;
+      mDataScanner.mSpeed = 1;
       break;
 
     case '2':
-      //passer la vitesse à 2
-      mDataScanner.mspeed = 2;
+      mDataScanner.mSpeed = 2;
       break;
 
     case '3':
-      //passer la vitesse à 3
-      mDataScanner.mspeed = 3;
+      mDataScanner.mSpeed = 3;
       break;
 
     case '4':
-      //passer la vitesse à 4
-      mDataScanner.mspeed = 4;
+      mDataScanner.mSpeed = 4;
       break;
 
     case '5':
-      //passer la vitesse à 5
-      mDataScanner.mspeed = 5;
+      mDataScanner.mSpeed = 5;
       break;
 
     case '6':
-      //passer la vitesse à 6
-      mDataScanner.mspeed = 6;
+      mDataScanner.mSpeed = 6;
       break;
       
     }
@@ -132,6 +133,27 @@ void loop() {
   
 
 }
+
+private void motorGoRight(){
+  digitalWrite(pinMotor1, HIGH);
+  digitalWrite(pinMotor2, LOW);
+  analogWrite(pinMotorPWM, speedTab[mDataScanner.mSpeed]);
+  
+}
+
+private void motorGoLeft(){
+  digitalWrite(pinMotor1, LOW);
+  digitalWrite(pinMotor2, HIGH);
+  analogWrite(pinMotorPWM, speedTab[mDataScanner.mSpeed]);
+}
+
+private void motorStop(){
+  digitalWrite(pinMotor1, LOW);
+  digitalWrite(pinMotor2, LOW);
+  analogWrite(pinMotorPWM, 0);
+}
+
+
 
 void stopScanner(){
   action = WANNA_STOP;

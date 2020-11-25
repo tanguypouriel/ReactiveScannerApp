@@ -104,7 +104,7 @@
     <TextView
         android:id="@+id/connectionStatusText"
         android:layout_width="match_parent"
-        android:layout_height="65dpdp"
+        android:layout_height="65dp"
         android:background="@drawable/bg_rounded_connected"
         android:padding="16dp"
         android:textAlignment="center"

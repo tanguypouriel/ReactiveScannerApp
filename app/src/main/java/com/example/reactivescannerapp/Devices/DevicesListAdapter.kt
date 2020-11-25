@@ -23,7 +23,7 @@ class DevicesListViewHolder(
 }
 
 class DevicesListAdapter(
-    private val clickDeviceHandler: (BluetoothDevice) -> Unit,
+    private val clickDeviceHandler: (BluetoothDevice) -> Unit
 ) : RecyclerView.Adapter<DevicesListViewHolder>(){
 
     private lateinit var deviceList: List<BluetoothDevice>
