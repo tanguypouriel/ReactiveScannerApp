@@ -23,8 +23,10 @@ const byte interruptPinLeft= 3;
 const byte interruptPinSpeed = 4; //interrupt ?
 
 const byte pinMotorPWM = 5;
-const byte pinMotor1 = 6;
-const byte pinMotor2 = = 7;
+const byte pinMotor1 = 32;
+const byte pinMotor2 = 33;
+
+const byte canalPWM0 = 0;
  
 
 char messageReceived = '3';
@@ -44,6 +46,9 @@ void setup() {
   attachInterrupt(interruptPinRight, rightScanner, RISING);
   attachInterrupt(interruptPinStop, leftScanner, RISING);
 
+  ledcAttachPin(pinMotorPWM, canalPWM0); 
+  ledcSetup(canalPWM0, 5000, 8);
+  
   SerialBT.begin("Scanner"); //Bluetooth device name
 }
 
@@ -71,7 +76,7 @@ void loop() {
       
   }
 
-  if ( boutdeCourseDroit ) {
+  /*if ( boutdeCourseDroit ) {
     SerialBT.write('D');
     motorStop();
     mDataScanner.state = STOP;
@@ -81,7 +86,7 @@ void loop() {
     SerialBT.write('E');
     motorStop();
     mDataScanner.state = STOP;
-  }
+  }*/
 
   if ( SerialBT.available() ) {
     
@@ -134,23 +139,23 @@ void loop() {
 
 }
 
-private void motorGoRight(){
+void motorGoRight(){
   digitalWrite(pinMotor1, HIGH);
   digitalWrite(pinMotor2, LOW);
-  analogWrite(pinMotorPWM, speedTab[mDataScanner.mSpeed]);
+  ledcWrite(canalPWM0, speedTab[mDataScanner.mSpeed]);
   
 }
 
-private void motorGoLeft(){
+void motorGoLeft(){
   digitalWrite(pinMotor1, LOW);
   digitalWrite(pinMotor2, HIGH);
-  analogWrite(pinMotorPWM, speedTab[mDataScanner.mSpeed]);
+  ledcWrite(canalPWM0, speedTab[mDataScanner.mSpeed]);
 }
 
-private void motorStop(){
+void motorStop(){
   digitalWrite(pinMotor1, LOW);
   digitalWrite(pinMotor2, LOW);
-  analogWrite(pinMotorPWM, 0);
+  ledcWrite(canalPWM0, 0);
 }
 
 
