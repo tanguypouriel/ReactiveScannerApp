@@ -1,7 +1,7 @@
 package com.example.reactivescannerapp.Devices
 
+import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
-import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
@@ -11,13 +11,12 @@ import com.harrysoft.androidbluetoothserial.BluetoothManager
 class DevicesViewModel : ViewModel() {
 
     private var bluetoothManager: BluetoothManager = BluetoothManager.getInstance()
-    var pairedDevicesList: MutableLiveData<List<BluetoothDevice>> = MutableLiveData()
+    val pairedDevicesList: MutableLiveData<List<BluetoothDevice>> = MutableLiveData()
+    var bluetoothAdapter: BluetoothAdapter? = null
 
-    init {
-        if (bluetoothManager == null) {
-            //TODO notifier que le bluetooth ne fonctionne pas
-        }
-    }
+    private val _errorMessages: MutableLiveData<String>? = null
+    val errorMessage = _errorMessages
+
 
     fun refreshPairedDevicesList(){
         pairedDevicesList.value = bluetoothManager.pairedDevicesList

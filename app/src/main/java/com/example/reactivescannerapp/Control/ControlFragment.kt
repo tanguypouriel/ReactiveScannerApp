@@ -1,35 +1,31 @@
 package com.example.reactivescannerapp.Control
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
-import android.widget.ProgressBar
-import android.widget.SeekBar
-import android.widget.TextView
+import android.widget.*
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import com.example.reactivescannerapp.R
 import com.example.reactivescannerapp.databinding.FragmentControlBinding
 import com.example.reactivescannerapp.model.State
+import com.google.android.material.snackbar.Snackbar
 
 
 class ControlFragment : Fragment() {
 
     private val args: ControlFragmentArgs by navArgs()
 
-    private lateinit var viewmodelFactory: ControlViewModelFactory
+    private lateinit var viewModelFactory: ControlViewModelFactory
+
     private val viewModel: ControlViewModel by viewModels (
-            factoryProducer = { viewmodelFactory }
+            factoryProducer = { viewModelFactory }
     )
 
     private lateinit var binding: FragmentControlBinding
 
-    lateinit var deviceName: String
-    lateinit var deviceAdress: String
 
     private lateinit var speedTextView: TextView
     private lateinit var speedTitleTextView: TextView
@@ -46,10 +42,7 @@ class ControlFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
-        deviceAdress = args.deviceAdress
-        deviceName = args.deviceName
-
-        viewmodelFactory = ControlViewModelFactory(args)
+        viewModelFactory = ControlViewModelFactory(args)
 
         binding = FragmentControlBinding.inflate(layoutInflater, container, false)
 
@@ -64,6 +57,9 @@ class ControlFragment : Fragment() {
         viewModel.state.observe(viewLifecycleOwner) { onScannerStateChanged(it) }
         viewModel.speed.observe(viewLifecycleOwner) { onScannerSpeedChanged(it) }
         viewModel.connectionStatus.observe(viewLifecycleOwner) { onConnectionStatus(it) }
+        viewModel.errorMessage.observe(viewLifecycleOwner) {
+            Snackbar.make(requireView(), it, Snackbar.LENGTH_LONG).show()
+        }
 
         seekBar.setOnSeekBarChangeListener( object : SeekBar.OnSeekBarChangeListener{
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -108,8 +104,13 @@ class ControlFragment : Fragment() {
         return binding.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        Toast.makeText(requireContext(), "device name : ${viewModel.deviceName}, device address : ${viewModel.deviceAdress}", Toast.LENGTH_LONG).show()
+    }
     
-    fun onConnectionStatus(connectionStatus : ConnectionStatus){
+    private fun onConnectionStatus(connectionStatus : ConnectionStatus){
         when (connectionStatus){
 
             ConnectionStatus.CONNECTED-> {
@@ -124,7 +125,7 @@ class ControlFragment : Fragment() {
                 seekBar.visibility = View.VISIBLE
 
 
-                connectionTextView.text = "Connecté à $deviceName"
+                connectionTextView.text = "Connecté à ${viewModel.deviceName}"
                 connectionTextView.setBackgroundResource(R.drawable.bg_rounded_connected)
             }
 
@@ -145,7 +146,7 @@ class ControlFragment : Fragment() {
         }
     }
 
-    fun onScannerStateChanged(state: State){
+    private fun onScannerStateChanged(state: State){
         when (state){
             State.STOP -> {
 
@@ -179,7 +180,7 @@ class ControlFragment : Fragment() {
         }
     }
 
-    fun onScannerSpeedChanged(speed: Int){
+    private fun onScannerSpeedChanged(speed: Int){
         seekBar.progress = speed
         speedTextView.text = speed.toString()
     }

@@ -8,6 +8,9 @@ const int speedTab[] = {50, 91, 132, 173, 214, 255};
 
 void setup() {
 
+  pinMode(pinMotor1, OUTPUT);
+  pinMode(pinMotor2, OUTPUT);
+
   ledcAttachPin(pinMotorPWM, canalPWM0); 
   ledcSetup(canalPWM0, 5000, 8);
 

@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.reactivescannerapp.model.ScannerData
 import com.example.reactivescannerapp.model.State
+import com.google.android.material.snackbar.Snackbar
 import com.harrysoft.androidbluetoothserial.BluetoothManager
 import com.harrysoft.androidbluetoothserial.BluetoothSerialDevice
 import com.harrysoft.androidbluetoothserial.SimpleBluetoothDeviceInterface
@@ -32,24 +33,21 @@ class ControlViewModel(args: ControlFragmentArgs) : ViewModel() {
 
     private val bluetoothManager = BluetoothManager.getInstance()
     private var deviceInterface: SimpleBluetoothDeviceInterface? = null
+    val errorMessage : MutableLiveData<String> by lazy { MutableLiveData<String>() }
 
     val connectionStatus: MutableLiveData<ConnectionStatus> = MutableLiveData(
         ConnectionStatus.DISCONNECTED
     )
 
-    private val deviceAdress: String = args.deviceAdress
+    val deviceAdress: String = args.deviceAdress
+    val deviceName: String = args.deviceName
+
     private var connectionAttemptedOrMade = false
 
     var scannerData: ScannerData = ScannerData()
     var speed: MutableLiveData<Int> = MutableLiveData(scannerData.speed)
     var state: MutableLiveData<State> = MutableLiveData(scannerData.state)
 
-
-    init{
-        if (bluetoothManager == null){
-
-        }
-    }
 
     fun connect() {
         if (!connectionAttemptedOrMade){
@@ -62,6 +60,7 @@ class ControlViewModel(args: ControlFragmentArgs) : ViewModel() {
                         onConnected(device.toSimpleDeviceInterface())
                     }) { t: Throwable? ->
                     connectionAttemptedOrMade = false
+                    errorMessage.value = t?.message ?: "Erreur vide"
                     connectionStatus.value = ConnectionStatus.DISCONNECTED
                 }
             )
@@ -90,8 +89,8 @@ class ControlViewModel(args: ControlFragmentArgs) : ViewModel() {
         if (deviceInterface != null){
             connectionStatus.value = ConnectionStatus.CONNECTED
 
-            deviceInterface.setListeners(::onMessageReceived, ::onMessageSent) {
-                //print error message
+            this.deviceInterface!!.setListeners(::onMessageReceived, ::onMessageSent) {
+                errorMessage.value = it?.message ?: "Erreur vide"
             }
         } else {
             connectionStatus.value = ConnectionStatus.DISCONNECTED
