@@ -1,5 +1,7 @@
 package com.example.reactivescannerapp.Control
 
+import android.bluetooth.BluetoothAdapter
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -9,17 +11,19 @@ import com.google.android.material.snackbar.Snackbar
 import com.harrysoft.androidbluetoothserial.BluetoothManager
 import com.harrysoft.androidbluetoothserial.BluetoothSerialDevice
 import com.harrysoft.androidbluetoothserial.SimpleBluetoothDeviceInterface
+import io.reactivex.android.plugins.RxAndroidPlugins
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
 import java.io.IOException
 import java.lang.IllegalArgumentException
 
 
-class ControlViewModelFactory(private val args: ControlFragmentArgs) : ViewModelProvider.Factory {
+class ControlViewModelFactory() : ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ControlViewModel::class.java)){
-            return ControlViewModel(args) as T
+            return ControlViewModel() as T
         }
 
         throw IllegalArgumentException("Unknown ViewModel Class")
@@ -27,20 +31,22 @@ class ControlViewModelFactory(private val args: ControlFragmentArgs) : ViewModel
 
 }
 
-class ControlViewModel(args: ControlFragmentArgs) : ViewModel() {
+class ControlViewModel() : ViewModel() {
 
     private val compositeDisposable = CompositeDisposable()
 
     private val bluetoothManager = BluetoothManager.getInstance()
+    var bluetoothAdapter : BluetoothAdapter? = null
     private var deviceInterface: SimpleBluetoothDeviceInterface? = null
+
     val errorMessage : MutableLiveData<String> by lazy { MutableLiveData<String>() }
 
     val connectionStatus: MutableLiveData<ConnectionStatus> = MutableLiveData(
         ConnectionStatus.DISCONNECTED
     )
 
-    val deviceAdress: String = args.deviceAdress
-    val deviceName: String = args.deviceName
+    private var deviceAdress: String? = null
+    val deviceName: String = "Scanner"
 
     private var connectionAttemptedOrMade = false
 
@@ -50,24 +56,35 @@ class ControlViewModel(args: ControlFragmentArgs) : ViewModel() {
 
 
     fun connect() {
+
+        for (device in bluetoothManager.pairedDevicesList){
+            if (device.name == deviceName)
+                deviceAdress = device.address
+        }
+
         if (!connectionAttemptedOrMade){
 
-            compositeDisposable.add(bluetoothManager.openSerialDevice(deviceAdress)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                    { device: BluetoothSerialDevice ->
-                        onConnected(device.toSimpleDeviceInterface())
-                    }) { t: Throwable? ->
-                    connectionAttemptedOrMade = false
-                    errorMessage.value = t?.message ?: "Erreur vide"
-                    connectionStatus.value = ConnectionStatus.DISCONNECTED
-                }
-            )
+            if (deviceAdress != null) {
+                compositeDisposable.add(bluetoothManager.openSerialDevice(deviceAdress)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                        { device: BluetoothSerialDevice ->
+                            onConnected(device.toSimpleDeviceInterface())
+                        }) { t: Throwable? ->
+                        connectionAttemptedOrMade = false
+                        errorMessage.value = t?.message ?: "Erreur vide"
+                        connectionStatus.value = ConnectionStatus.DISCONNECTED
+                    }
+                )
 
-            connectionAttemptedOrMade = true
+                connectionAttemptedOrMade = true
 
-            connectionStatus.value = ConnectionStatus.CONNECTING
+                connectionStatus.value = ConnectionStatus.CONNECTING
+
+            } else {
+                errorMessage.value = "Veuillez vous connecter une première fois au scanner dans les paramètres"
+            }
 
         }
     }
@@ -102,29 +119,63 @@ class ControlViewModel(args: ControlFragmentArgs) : ViewModel() {
     private fun onMessageReceived(message: String){
         when(message){
 
-            "A" -> scannerData.state = State.IS_RUNNING_RIGHT
+            "A" -> {
+                scannerData.state = State.IS_RUNNING_RIGHT
+                state.value = State.IS_RUNNING_RIGHT
+            }
 
-            "B" -> scannerData.state = State.IS_RUNNING_LEFT
+            "B" -> {
+                scannerData.state = State.IS_RUNNING_LEFT
+                state.value = State.IS_RUNNING_LEFT
+            }
 
-            "C" -> scannerData.state = State.STOP
+            "C" -> {
+                scannerData.state = State.STOP
+                state.value = State.STOP
+            }
 
-            "D" -> scannerData.state = State.IS_MAX_RIGHT
+            "D" -> {
+                scannerData.state = State.IS_MAX_RIGHT
+                state.value = State.IS_MAX_RIGHT
+            }
 
-            "E" -> scannerData.state = State.IS_MAX_LEFT
+            "E" -> {
+                scannerData.state = State.IS_MAX_LEFT
+                state.value = State.IS_MAX_LEFT
+            }
 
-            "1" -> scannerData.speed = 1
+            "1" -> {
+                scannerData.speed = 1
+                speed.value = 1
+            }
 
-            "2" -> scannerData.speed = 2
+            "2" -> {
+                scannerData.speed = 2
+                speed.value = 2
+            }
 
-            "3" -> scannerData.speed = 3
+            "3" -> {
+                scannerData.speed = 3
+                speed.value = 3
+            }
 
-            "4" -> scannerData.speed = 4
+            "4" -> {
+                scannerData.speed = 4
+                speed.value = 4
+            }
 
-            "5" -> scannerData.speed = 5
+            "5" -> {
+                scannerData.speed = 5
+                speed.value = 5
+            }
 
-            "6" -> scannerData.speed = 6
+            "6" -> {
+                scannerData.speed = 6
+                speed.value = 6
+            }
 
-            else -> throw(IOException("Unknown message received"))
+            else -> errorMessage.value = "Message inconnu reçu : $message"
+
         }
     }
 

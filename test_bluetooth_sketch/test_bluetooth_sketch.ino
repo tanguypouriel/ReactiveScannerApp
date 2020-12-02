@@ -18,7 +18,7 @@ void setup() {
 
 void loop() {
 
-   if (SerialBT.available()) {
+  if (SerialBT.available()) {
     Serial.write(SerialBT.read());
   }
 
