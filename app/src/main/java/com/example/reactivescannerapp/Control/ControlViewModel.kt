@@ -7,43 +7,24 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.reactivescannerapp.model.ScannerData
 import com.example.reactivescannerapp.model.State
-import com.google.android.material.snackbar.Snackbar
 import com.harrysoft.androidbluetoothserial.BluetoothManager
 import com.harrysoft.androidbluetoothserial.BluetoothSerialDevice
 import com.harrysoft.androidbluetoothserial.SimpleBluetoothDeviceInterface
-import io.reactivex.android.plugins.RxAndroidPlugins
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
-import java.io.IOException
-import java.lang.IllegalArgumentException
 
-
-class ControlViewModelFactory() : ViewModelProvider.Factory {
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(ControlViewModel::class.java)){
-            return ControlViewModel() as T
-        }
-
-        throw IllegalArgumentException("Unknown ViewModel Class")
-    }
-
-}
 
 class ControlViewModel() : ViewModel() {
 
     private val compositeDisposable = CompositeDisposable()
 
     private val bluetoothManager = BluetoothManager.getInstance()
-    var bluetoothAdapter : BluetoothAdapter? = null
     private var deviceInterface: SimpleBluetoothDeviceInterface? = null
 
     val errorMessage : MutableLiveData<String> by lazy { MutableLiveData<String>() }
 
-    val connectionStatus: MutableLiveData<ConnectionStatus> = MutableLiveData(
-        ConnectionStatus.DISCONNECTED
-    )
+    val connectionStatus: MutableLiveData<ConnectionStatus> = MutableLiveData(ConnectionStatus.DISCONNECTED)
 
     private var deviceAdress: String? = null
     val deviceName: String = "Scanner"
@@ -107,7 +88,7 @@ class ControlViewModel() : ViewModel() {
             connectionStatus.value = ConnectionStatus.CONNECTED
 
             this.deviceInterface!!.setListeners(::onMessageReceived, ::onMessageSent) {
-                errorMessage.value = it?.message ?: "Erreur vide"
+                errorMessage.value = "Le Scanner n'as pas été trouvé, assurez vous qu'il est allumé et à porté"
             }
         } else {
             connectionStatus.value = ConnectionStatus.DISCONNECTED

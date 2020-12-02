@@ -1,11 +1,17 @@
 <resources>
     <string name="app_name">ReactiveScannerApp</string>
 
-    <string name="refresh_string">Rafraîchir</string>
-
     <string name="device_name_string">Nom : </string>
 
     <string name="device_adress_title">Adresse :</string>
 
-    <string name="select_device_string">Veuillez sélectionner l\'appareil Scanner : </string>
+    <string name="status_button_connected">Connecté au scanner</string>
+    <string name="status_button_disconnected">Se connecter</string>
+    <string name="status_button_connecting">En cours de connection</string>
+
+    <string name="menu_contacts">Contacts</string>
+    <string name="menu_credits">Crédits</string>
+
+    <string name="dialog_contacts">En cas de bugs ou si besoin d\'amélioration, contacter Tanguy Pouriel : tanguy.pouriel@utt.fr</string>
+    <string name="dialog_credits">Projet réalisé par Florent Gertaldi, Adam Wysocki et Tanguy Pouriel</string>
 </resources>
