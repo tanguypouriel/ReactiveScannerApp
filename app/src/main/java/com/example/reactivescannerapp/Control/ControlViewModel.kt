@@ -54,7 +54,7 @@ class ControlViewModel() : ViewModel() {
                             onConnected(device.toSimpleDeviceInterface())
                         }) { t: Throwable? ->
                         connectionAttemptedOrMade = false
-                        errorMessage.value = t?.message ?: "Erreur vide"
+                        errorMessage.value = "Le Scanner n'as pas été trouvé, assurez vous qu'il est allumé et à portée"
                         connectionStatus.value = ConnectionStatus.DISCONNECTED
                     }
                 )
@@ -88,8 +88,13 @@ class ControlViewModel() : ViewModel() {
             connectionStatus.value = ConnectionStatus.CONNECTED
 
             this.deviceInterface!!.setListeners(::onMessageReceived, ::onMessageSent) {
-                errorMessage.value = "Le Scanner n'as pas été trouvé, assurez vous qu'il est allumé et à porté"
+                errorMessage.value = "Le Scanner n'as pas été trouvé, assurez vous qu'il est allumé et à portée"
+                connectionStatus.value = ConnectionStatus.DISCONNECTED
+                disconnect()
             }
+
+            // demande de synchronisation des valeurs à la connexion
+            sendMessage("F")
         } else {
             connectionStatus.value = ConnectionStatus.DISCONNECTED
         }
@@ -98,6 +103,7 @@ class ControlViewModel() : ViewModel() {
 
 
     private fun onMessageReceived(message: String){
+
         when(message){
 
             "A" -> {
@@ -161,7 +167,6 @@ class ControlViewModel() : ViewModel() {
     }
 
     private fun onMessageSent(message: String){
-
     }
 
     fun sendMessage(message: String){

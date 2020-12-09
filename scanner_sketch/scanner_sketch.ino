@@ -207,7 +207,7 @@ void loop() {
       displayDigit(mDataScanner.mSpeed);
       break;
 
-    case 'H': // demande de synchronisation
+    case 'F': // demande de synchronisation
       sendChar(char(mDataScanner.mSpeed));
 
       switch (mDataScanner.state) {
@@ -224,11 +224,11 @@ void loop() {
           break;
 
         case MAX_RIGHT:
-          sendChar('F');
+          sendChar('D');
           break;
 
         case MAX_LEFT:
-          sendChar('G');
+          sendChar('E');
           break;
       }      
     }

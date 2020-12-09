@@ -16,9 +16,12 @@ import com.example.reactivescannerapp.Control.ConnectionStatus
 import com.example.reactivescannerapp.Control.ControlViewModel
 import com.example.reactivescannerapp.model.State
 import com.google.android.material.snackbar.Snackbar
+import it.sephiroth.android.library.numberpicker.doOnProgressChanged
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 
+
+// est ce qu'on affiche un message quand la batterie est déchargée ?
 class MainActivity : AppCompatActivity() {
 
     val viewModel: ControlViewModel by viewModels()
@@ -29,7 +32,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-        if ( bluetoothAdapter!!.isEnabled){
+        if ( !bluetoothAdapter!!.isEnabled ){
             val enableBluetoothIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
             startActivityForResult(enableBluetoothIntent, REQUEST_ENABLE_BLUETOOTH)
         }
@@ -38,24 +41,16 @@ class MainActivity : AppCompatActivity() {
         viewModel.speed.observe(this) { onScannerSpeedChanged(it) }
         viewModel.connectionStatus.observe(this) { onConnectionStatus(it) }
         viewModel.errorMessage.observe(this) {
-            Snackbar.make(findViewById(R.id.speedTextView), it, Snackbar.LENGTH_LONG).show()
+            Snackbar.make(findViewById(R.id.connectionStatusButton), it, Snackbar.LENGTH_LONG).show()
         }
 
 
-        seekBar.setOnSeekBarChangeListener( object : SeekBar.OnSeekBarChangeListener{
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                if (fromUser){
-                    viewModel.scannerData.speed = progress
-                    viewModel.sendMessage(progress.toString())
-                }
+        numberPicker.doOnProgressChanged { _, progress, fromUser ->
+            if (fromUser){
+                viewModel.scannerData.speed = progress
+                viewModel.sendMessage(progress.toString())
             }
-            override fun onStartTrackingTouch(p0: SeekBar?) {
-
-            }
-            override fun onStopTrackingTouch(p0: SeekBar?) {
-
-            }
-        })
+        }
 
         goRightButton.setOnClickListener {
 
@@ -67,7 +62,6 @@ class MainActivity : AppCompatActivity() {
                 // vérifier que le message a bien été recu ?
             }
 
-            Log.d("mdebug", "coucou")
         }
 
         goLeftButton.setOnClickListener {
@@ -165,9 +159,8 @@ class MainActivity : AppCompatActivity() {
                 playPauseButton.visibility = View.VISIBLE
                 goRightButton.visibility = View.VISIBLE
                 goLeftButton.visibility = View.VISIBLE
-                speedTextView.visibility = View.VISIBLE
                 speedTitleTextView.visibility = View.VISIBLE
-                seekBar.visibility = View.VISIBLE
+                numberPicker.visibility = View.VISIBLE
 
 
                 connectionStatusButton.text = getString(R.string.status_button_connected)
@@ -182,9 +175,8 @@ class MainActivity : AppCompatActivity() {
                 playPauseButton.visibility = View.GONE
                 goRightButton.visibility = View.GONE
                 goLeftButton.visibility = View.GONE
-                speedTextView.visibility = View.GONE
                 speedTitleTextView.visibility = View.GONE
-                seekBar.visibility = View.GONE
+                numberPicker.visibility = View.GONE
 
                 connectionStatusButton.text = getString(R.string.status_button_disconnected)
                 connectionStatusButton.setBackgroundResource(R.drawable.bg_rounded_disconnected)
@@ -206,7 +198,6 @@ class MainActivity : AppCompatActivity() {
             State.STOP -> {
 
                 playPauseButton.visibility = View.GONE
-                Log.d("mdebug", "viewGone")
 
             }
             State.IS_MAX_LEFT -> {
@@ -237,9 +228,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onScannerSpeedChanged(speed: Int){
-        Log.d("mdebug", "vitesse : $speed")
-        seekBar.progress = speed
-        speedTextView.text = speed.toString()
+        numberPicker.progress = speed
     }
 
     override fun onDestroy() {
