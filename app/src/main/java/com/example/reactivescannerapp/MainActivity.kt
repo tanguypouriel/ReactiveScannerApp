@@ -8,10 +8,10 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.SeekBar
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import com.example.reactivescannerapp.Control.ConnectionStatus
 import com.example.reactivescannerapp.Control.ControlViewModel
 import com.example.reactivescannerapp.model.State
@@ -164,7 +164,7 @@ class MainActivity : AppCompatActivity() {
 
 
                 connectionStatusButton.text = getString(R.string.status_button_connected)
-                connectionStatusButton.setBackgroundResource(R.drawable.bg_rounded_connected)
+                connectionStatusButton.backgroundTintList = getColorStateList(R.color.state_list_connected)
                 connectionStatusButton.isClickable = true
             }
 
@@ -179,14 +179,14 @@ class MainActivity : AppCompatActivity() {
                 numberPicker.visibility = View.GONE
 
                 connectionStatusButton.text = getString(R.string.status_button_disconnected)
-                connectionStatusButton.setBackgroundResource(R.drawable.bg_rounded_disconnected)
+                connectionStatusButton.backgroundTintList = getColorStateList(R.color.state_list_disconnected)
                 connectionStatusButton.isClickable = true
             }
 
             ConnectionStatus.CONNECTING -> {
                 progressBar.visibility = View.VISIBLE
                 connectionStatusButton.text = getString(R.string.status_button_connecting)
-                connectionStatusButton.setBackgroundResource(R.drawable.bg_rounded_connecting)
+                connectionStatusButton.backgroundTintList = getColorStateList(R.color.state_list_connecting)
                 connectionStatusButton.isClickable = false
             }
 

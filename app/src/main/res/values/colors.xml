@@ -17,5 +17,6 @@
     <color name="white">#FFFFFFFF</color>
     <color name="green">#4CEF7B</color>
     <color name="red">#D51C1B</color>
+    <color name="lightRed">#DF3C3B</color>
     <color name="yellow">#F0EB65</color>
 </resources>

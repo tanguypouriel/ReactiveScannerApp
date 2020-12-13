@@ -24,4 +24,5 @@
     <style name="Theme.ReactiveScannerApp.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="Theme.ReactiveScannerApp.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
 </resources>
