@@ -12,6 +12,8 @@
 #define pinF 5
 #define pinG 18
 
+#define VAL_SEUIL 3000   // should be between 0-4095
+
 const bool segTab[6][7] = {
   {1,0,0,1,1,1,1},
   {0,0,1,0,0,1,0},
@@ -72,8 +74,8 @@ void setup() {
   pinMode(pinMotor2, OUTPUT);
   pinMode(pinMotorPWM, OUTPUT);
 
-  /*pinMode(pinCurrent, INPUT);
-  pinMode(pinBattery, INPUT);*/
+  pinMode(pinCurrent, INPUT);
+  //pinMode(pinBattery, INPUT);
 
   action = NO_ACTION;
 
@@ -131,7 +133,7 @@ void loop() {
     action = NO_ACTION;
   }*/
 
-  /*if ( boutdeCourse ) {
+  if ( analogRead(pinCurrent) > VAL_SEUIL ) {
     if(mDataScanner.state == RIGHT){
       sendChar('D');
       mDataScanner.state = MAX_RIGHT;
@@ -140,7 +142,7 @@ void loop() {
       mDataScanner.state = MAX_LEFT;
     }
     motorStop();
-  }*/
+  }
 
   if ( action == WANNA_STOP ){
       sendChar('C');
