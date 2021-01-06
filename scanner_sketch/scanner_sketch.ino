@@ -4,13 +4,13 @@
 #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
 #endif
 
-#define pinA 15
-#define pinB 2
-#define pinC 4
-#define pinD 16
-#define pinE 17
-#define pinF 5
-#define pinG 18
+#define pinA 2
+#define pinB 4
+#define pinC 16
+#define pinD 17
+#define pinE 5
+#define pinF 18
+#define pinG 19
 
 #define VAL_SEUIL 3000   // should be between 0-4095
 
@@ -36,19 +36,20 @@ typedef struct{
 volatile Actions action;
 dataScanner mDataScanner{3, STOP};
 
+Actions lastAction;
+
 const byte interruptPinStop = 35; 
 const byte interruptPinRight= 12;
 const byte interruptPinLeft= 14;
-//const byte interruptPinSpeedUp = 27;
-//const byte interruptPinSpeedDown = 26;
+const byte interruptPinSpeedUp = 25;
+const byte interruptPinSpeedDown = 26;
 
-const byte pinMotorPWM = 27;
+const byte pinMotorPWM = 27; //enable du pont en H
 const byte pinMotor1 = 32;
 const byte pinMotor2 = 33;
 
 const byte pinsDigit[] = { pinA, pinB, pinC, pinD, pinE, pinF, pinG};
 
-const byte pinCurrent = 25; // OUTPUT pas initialisé
 const byte pinBattery = 34; // OUTPUT pas initialisé
 
 const byte canalPWM0 = 0;
@@ -63,8 +64,8 @@ void setup() {
   pinMode(interruptPinStop, INPUT);
   pinMode(interruptPinRight, INPUT);
   pinMode(interruptPinLeft, INPUT);
-//  pinMode(interruptPinSpeedUp, INPUT);
- // pinMode(interruptPinSpeedDown, INPUT);
+  pinMode(interruptPinSpeedUp, INPUT);
+  pinMode(interruptPinSpeedDown, INPUT);
 
   for (int i=0; i < 7 ; i++) {
     pinMode(pinsDigit[i], OUTPUT);
@@ -74,16 +75,15 @@ void setup() {
   pinMode(pinMotor2, OUTPUT);
   pinMode(pinMotorPWM, OUTPUT);
 
-  pinMode(pinCurrent, INPUT);
   //pinMode(pinBattery, INPUT);
 
   action = NO_ACTION;
 
   attachInterrupt(interruptPinStop, stopScanner, RISING);
- /* attachInterrupt(interruptPinRight, rightScanner, RISING);
+  attachInterrupt(interruptPinRight, rightScanner, RISING);
   attachInterrupt(interruptPinLeft, leftScanner, RISING);
- // attachInterrupt(interruptPinSpeedUp, speedUp, RISING);
-  attachInterrupt(interruptPinSpeedDown, speedDown, RISING);*/
+  attachInterrupt(interruptPinSpeedUp, speedUp, RISING);
+  attachInterrupt(interruptPinSpeedDown, speedDown, RISING);
 
   ledcAttachPin(pinMotorPWM, canalPWM0); 
   ledcSetup(canalPWM0, 5000, 8);
@@ -94,46 +94,66 @@ void setup() {
 
 void loop() {
 
-  /*switch(action){
+  switch(action){
     
     case WANNA_GO_RIGHT:
-      sendChar('A');
-      motorGoRight();
-      mDataScanner.state = RIGHT;
+
+      if ( lastAction != WANNA_GO_RIGHT ) {
+        sendChar('A');
+        motorGoRight();
+        mDataScanner.state = RIGHT;
+        lastAction = WANNA_GO_RIGHT;
+      }
+
       break;
       
     case WANNA_GO_LEFT:
-      sendChar('B');
-      motorGoLeft(); 
-      mDataScanner.state = LEFT;
+
+      if ( lastAction != WANNA_GO_LEFT ) {
+        sendChar('B');
+        motorGoLeft(); 
+        mDataScanner.state = LEFT;
+        lastAction = WANNA_GO_LEFT;
+      }
+
       break;
       
     case WANNA_STOP:
-      sendChar('C');
-      motorStop();
-      mDataScanner.state = STOP;
+
+      if (lastAction != WANNA_STOP) {
+        sendChar('C');
+        motorStop();
+        mDataScanner.state = STOP;
+        lastAction = WANNA_STOP;
+      }
+
       break;
 
     case WANNA_SPEED_UP:
-    if(mDataScanner.mSpeed < 6){
-      mDataScanner.mSpeed++;
-      sendChar(char(mDataScanner.mSpeed));
-      displayDigit(mDataScanner.mSpeed);
-    }
+       
+        if(mDataScanner.mSpeed < 6){
+          mDataScanner.mSpeed++;
+          sendChar(intToChar(mDataScanner.mSpeed));
+          displayDigit(mDataScanner.mSpeed);
+          
+        }
+
     break;
 
     case WANNA_SPEED_DOWN:
-    if(mDataScanner.mSpeed > 1){
-      mDataScanner.mSpeed--;
-      sendChar(char(mDataScanner.mSpeed));
-      displayDigit(mDataScanner.mSpeed);
-    }
+        
+        if(mDataScanner.mSpeed > 1){
+          mDataScanner.mSpeed--;
+          sendChar(intToChar(mDataScanner.mSpeed));
+          displayDigit(mDataScanner.mSpeed);
+        }
+      
     break;
 
     action = NO_ACTION;
-  }*/
+  }
 
-  if ( analogRead(pinCurrent) > VAL_SEUIL ) {
+  /*if ( analogRead(pinCurrent) > VAL_SEUIL ) {
     if(mDataScanner.state == RIGHT){
       sendChar('D');
       mDataScanner.state = MAX_RIGHT;
@@ -142,14 +162,7 @@ void loop() {
       mDataScanner.state = MAX_LEFT;
     }
     motorStop();
-  }
-
-  if ( action == WANNA_STOP ){
-      sendChar('C');
-      motorStop();
-      mDataScanner.state = STOP;
-      action = NO_ACTION;
-  }
+  } */
   
   if ( SerialBT.available() ) {
     
@@ -162,16 +175,19 @@ void loop() {
     case 'A': 
       motorGoRight();
       mDataScanner.state = RIGHT;
+      lastAction = WANNA_GO_RIGHT;
       break;
 
     case 'B':
       motorGoLeft();
       mDataScanner.state = LEFT;
+      lastAction = WANNA_GO_LEFT;
       break;
 
     case 'C':
       motorStop();
       mDataScanner.state = STOP;
+      lastAction = WANNA_STOP;
 
     case '1':
       mDataScanner.mSpeed = 1;
@@ -210,7 +226,7 @@ void loop() {
       break;
 
     case 'F': // demande de synchronisation
-      sendChar(char(mDataScanner.mSpeed));
+      sendChar(intToChar(mDataScanner.mSpeed));
 
       switch (mDataScanner.state) {
         case RIGHT:
@@ -286,6 +302,7 @@ void refreshSpeed() {
     motorGoLeft();
   }
 }
+
 void displayDigit(int mSpeed) {
   
   mSpeed--;
@@ -300,22 +317,51 @@ void sendChar(char val){
   SerialBT.write('\r');
 }
 
+char intToChar(int val) {
+
+  switch (val) {
+    case 1:
+      return '1';
+      break;
+    case 2:
+      return '2';
+      break;
+    case 3:
+      return '3';
+      break;
+    case 4:
+      return '4';
+      break;
+    case 5:
+      return '5';
+      break;
+    case 6:
+      return '6';
+      break;
+  }
+  
+}
+
 void stopScanner(){
   action = WANNA_STOP;
 }
 
 void rightScanner(){
   action = WANNA_GO_RIGHT;
+  //delay(10);
 }
 
 void leftScanner(){
   action = WANNA_GO_LEFT;
+  //delay(10);
 }
 
 void speedUp(){
   action = WANNA_SPEED_UP;
+  //delay(10);
 }
 
 void speedDown(){
   action = WANNA_SPEED_DOWN;
+ // delay(10);
 }

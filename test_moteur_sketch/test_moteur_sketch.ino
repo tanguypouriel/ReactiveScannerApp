@@ -1,6 +1,6 @@
-const byte pinMotorPWM = 5;
-const byte pinMotor1 = 17;
-const byte pinMotor2 = 18;
+const byte pinMotorPWM = 27;
+const byte pinMotor1 = 32;
+const byte pinMotor2 = 33;
 const byte canalPWM0 = 0;
 
 
@@ -24,7 +24,7 @@ void loop() {
 
   digitalWrite(pinMotor1, HIGH);
   digitalWrite(pinMotor2, LOW);
-  ledcWrite(canalPWM0, 200);
+  ledcWrite(canalPWM0, 255);
 
   digitalWrite(2, HIGH);
 
