@@ -164,6 +164,10 @@ class ControlViewModel() : ViewModel() {
             else -> errorMessage.value = "Message inconnu reçu : $message"
 
         }
+
+        Log.i("testSynchro", message)
+
+        Log.i("testSynchro", scannerData.toString())
     }
 
     private fun onMessageSent(message: String){

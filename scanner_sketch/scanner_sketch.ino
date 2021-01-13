@@ -13,6 +13,8 @@
 #define pinG 19
 
 #define VAL_SEUIL 3000   // should be between 0-4095
+#define DEBOUNCE_TIME 400
+volatile uint32_t debounceTimer = 0;
 
 const bool segTab[6][7] = {
   {1,0,0,1,1,1,1},
@@ -103,6 +105,7 @@ void loop() {
         motorGoRight();
         mDataScanner.state = RIGHT;
         lastAction = WANNA_GO_RIGHT;
+        action = NO_ACTION;
       }
 
       break;
@@ -114,6 +117,7 @@ void loop() {
         motorGoLeft(); 
         mDataScanner.state = LEFT;
         lastAction = WANNA_GO_LEFT;
+        action = NO_ACTION;
       }
 
       break;
@@ -125,6 +129,7 @@ void loop() {
         motorStop();
         mDataScanner.state = STOP;
         lastAction = WANNA_STOP;
+        action = NO_ACTION;
       }
 
       break;
@@ -133,9 +138,10 @@ void loop() {
        
         if(mDataScanner.mSpeed < 6){
           mDataScanner.mSpeed++;
+          refreshSpeed();
           sendChar(intToChar(mDataScanner.mSpeed));
           displayDigit(mDataScanner.mSpeed);
-          
+          action = NO_ACTION;          
         }
 
     break;
@@ -144,14 +150,18 @@ void loop() {
         
         if(mDataScanner.mSpeed > 1){
           mDataScanner.mSpeed--;
+          refreshSpeed();
           sendChar(intToChar(mDataScanner.mSpeed));
           displayDigit(mDataScanner.mSpeed);
+          action = NO_ACTION;
         }
       
     break;
 
-    action = NO_ACTION;
+
   }
+
+
 
   /*if ( analogRead(pinCurrent) > VAL_SEUIL ) {
     if(mDataScanner.state == RIGHT){
@@ -348,20 +358,22 @@ void stopScanner(){
 
 void rightScanner(){
   action = WANNA_GO_RIGHT;
-  //delay(10);
 }
 
 void leftScanner(){
   action = WANNA_GO_LEFT;
-  //delay(10);
 }
 
 void speedUp(){
-  action = WANNA_SPEED_UP;
-  //delay(10);
+  if( millis() - DEBOUNCE_TIME >= debounceTimer){
+    debounceTimer = millis();
+    action = WANNA_SPEED_UP;
+  }  
 }
 
 void speedDown(){
-  action = WANNA_SPEED_DOWN;
- // delay(10);
+  if( millis() - DEBOUNCE_TIME >= debounceTimer){
+    debounceTimer = millis();
+    action = WANNA_SPEED_DOWN;
+  } 
 }
