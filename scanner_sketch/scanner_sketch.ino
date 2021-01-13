@@ -28,7 +28,7 @@ const bool segTab[6][7] = {
 BluetoothSerial SerialBT;
 
 enum State { RIGHT, LEFT, STOP, MAX_RIGHT, MAX_LEFT};
-enum Actions { WANNA_GO_RIGHT, WANNA_GO_LEFT, WANNA_STOP, WANNA_SPEED_UP, WANNA_SPEED_DOWN, NO_ACTION };
+enum Actions { WANNA_GO_RIGHT, WANNA_GO_LEFT, WANNA_STOP, WANNA_SPEED_UP, WANNA_SPEED_DOWN, WANNA_MAX_RIGHT, WANNA_MAX_LEFT, NO_ACTION };
 
 typedef struct{
   int mSpeed;
@@ -40,11 +40,13 @@ dataScanner mDataScanner{3, STOP};
 
 Actions lastAction;
 
-const byte interruptPinStop = 35; 
+const byte interruptPinStop = 13; 
 const byte interruptPinRight= 12;
 const byte interruptPinLeft= 14;
 const byte interruptPinSpeedUp = 25;
 const byte interruptPinSpeedDown = 26;
+const byte interruptPinMaxRight = 34; 
+const byte interruptPinMaxLeft = 35;
 
 const byte pinMotorPWM = 27; //enable du pont en H
 const byte pinMotor1 = 32;
@@ -52,7 +54,7 @@ const byte pinMotor2 = 33;
 
 const byte pinsDigit[] = { pinA, pinB, pinC, pinD, pinE, pinF, pinG};
 
-const byte pinBattery = 34; // OUTPUT pas initialisé
+
 
 const byte canalPWM0 = 0;
  
@@ -68,6 +70,8 @@ void setup() {
   pinMode(interruptPinLeft, INPUT);
   pinMode(interruptPinSpeedUp, INPUT);
   pinMode(interruptPinSpeedDown, INPUT);
+  pinMode(interruptPinMaxRight, INPUT);
+  pinMode(interruptPinMaxLeft, INPUT);
 
   for (int i=0; i < 7 ; i++) {
     pinMode(pinsDigit[i], OUTPUT);
@@ -77,8 +81,6 @@ void setup() {
   pinMode(pinMotor2, OUTPUT);
   pinMode(pinMotorPWM, OUTPUT);
 
-  //pinMode(pinBattery, INPUT);
-
   action = NO_ACTION;
 
   attachInterrupt(interruptPinStop, stopScanner, RISING);
@@ -86,6 +88,8 @@ void setup() {
   attachInterrupt(interruptPinLeft, leftScanner, RISING);
   attachInterrupt(interruptPinSpeedUp, speedUp, RISING);
   attachInterrupt(interruptPinSpeedDown, speedDown, RISING);
+  attachInterrupt(interruptPinMaxRight, maxRight, RISING);
+  attachInterrupt(interruptPinMaxLeft, maxLeft, RISING);
 
   ledcAttachPin(pinMotorPWM, canalPWM0); 
   ledcSetup(canalPWM0, 5000, 8);
@@ -100,7 +104,7 @@ void loop() {
     
     case WANNA_GO_RIGHT:
 
-      if ( lastAction != WANNA_GO_RIGHT ) {
+      if ( lastAction != WANNA_GO_RIGHT && mDataScanner.state != MAX_RIGHT ) {
         sendChar('A');
         motorGoRight();
         mDataScanner.state = RIGHT;
@@ -112,7 +116,7 @@ void loop() {
       
     case WANNA_GO_LEFT:
 
-      if ( lastAction != WANNA_GO_LEFT ) {
+      if ( lastAction != WANNA_GO_LEFT && mDataScanner.state != MAX_LEFT) {
         sendChar('B');
         motorGoLeft(); 
         mDataScanner.state = LEFT;
@@ -158,21 +162,26 @@ void loop() {
       
     break;
 
+    case WANNA_MAX_RIGHT:
+
+      mDataScanner.state = MAX_RIGHT;
+      sendChar('D');
+      motorStop();
+      action = NO_ACTION;
+      lastAction = WANNA_MAX_RIGHT;
+      break;
+
+    case WANNA_MAX_LEFT:
+
+      mDataScanner.state = MAX_LEFT;
+      sendChar('E');
+      motorStop();
+      action = NO_ACTION;
+      lastAction = WANNA_MAX_LEFT;
+      break;
 
   }
 
-
-
-  /*if ( analogRead(pinCurrent) > VAL_SEUIL ) {
-    if(mDataScanner.state == RIGHT){
-      sendChar('D');
-      mDataScanner.state = MAX_RIGHT;
-    }else if(mDataScanner.state == LEFT){
-      sendChar('E');
-      mDataScanner.state = MAX_LEFT;
-    }
-    motorStop();
-  } */
   
   if ( SerialBT.available() ) {
     
@@ -376,4 +385,12 @@ void speedDown(){
     debounceTimer = millis();
     action = WANNA_SPEED_DOWN;
   } 
+}
+
+void maxRight() {
+  action = WANNA_MAX_RIGHT;
+}
+
+void maxLeft() {
+  action = WANNA_MAX_LEFT;
 }

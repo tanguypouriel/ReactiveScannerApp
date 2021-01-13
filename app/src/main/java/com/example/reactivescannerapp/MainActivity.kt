@@ -202,14 +202,15 @@ class MainActivity : AppCompatActivity() {
             }
             State.IS_MAX_LEFT -> {
 
-                playPauseButton.isClickable = false
+                playPauseButton.visibility = View.GONE
                 goLeftButton.visibility = View.GONE
 
             }
             State.IS_MAX_RIGHT -> {
 
-                playPauseButton.isClickable = false
+                playPauseButton.visibility = View.GONE
                 goRightButton.visibility = View.GONE
+
 
             }
             State.IS_RUNNING_LEFT -> {
