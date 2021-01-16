@@ -12,7 +12,6 @@
 #define pinF 18
 #define pinG 19
 
-#define VAL_SEUIL 3000   // should be between 0-4095
 #define DEBOUNCE_TIME 400
 volatile uint32_t debounceTimer = 0;
 
@@ -388,9 +387,16 @@ void speedDown(){
 }
 
 void maxRight() {
-  action = WANNA_MAX_RIGHT;
+  if( millis() - DEBOUNCE_TIME >= debounceTimer){
+    debounceTimer = millis();
+    action = WANNA_MAX_RIGHT;
+  }
+ 
 }
 
 void maxLeft() {
-  action = WANNA_MAX_LEFT;
+  if( millis() - DEBOUNCE_TIME >= debounceTimer){
+    debounceTimer = millis();
+    action = WANNA_MAX_LEFT;
+  }
 }
