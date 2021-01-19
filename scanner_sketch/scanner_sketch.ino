@@ -28,6 +28,7 @@ BluetoothSerial SerialBT;
 
 enum State { RIGHT, LEFT, STOP, MAX_RIGHT, MAX_LEFT};
 enum Actions { WANNA_GO_RIGHT, WANNA_GO_LEFT, WANNA_STOP, WANNA_SPEED_UP, WANNA_SPEED_DOWN, WANNA_MAX_RIGHT, WANNA_MAX_LEFT, NO_ACTION };
+//enum LastMax { NOTHING, LAST_MAX_RIGHT, LAST_MAX_LEFT };
 
 typedef struct{
   int mSpeed;
@@ -38,6 +39,7 @@ volatile Actions action;
 dataScanner mDataScanner{3, STOP};
 
 Actions lastAction;
+//LastMax lastMax;
 
 const byte interruptPinStop = 13; 
 const byte interruptPinRight= 12;
@@ -53,8 +55,6 @@ const byte pinMotor2 = 33;
 
 const byte pinsDigit[] = { pinA, pinB, pinC, pinD, pinE, pinF, pinG};
 
-
-
 const byte canalPWM0 = 0;
  
 
@@ -69,8 +69,8 @@ void setup() {
   pinMode(interruptPinLeft, INPUT);
   pinMode(interruptPinSpeedUp, INPUT);
   pinMode(interruptPinSpeedDown, INPUT);
-  pinMode(interruptPinMaxRight, INPUT);
-  pinMode(interruptPinMaxLeft, INPUT);
+ /* pinMode(interruptPinMaxRight, INPUT);
+  pinMode(interruptPinMaxLeft, INPUT);*/
 
   for (int i=0; i < 7 ; i++) {
     pinMode(pinsDigit[i], OUTPUT);
@@ -81,19 +81,19 @@ void setup() {
   pinMode(pinMotorPWM, OUTPUT);
 
   action = NO_ACTION;
+  //lastMax = NOTHING;
 
   attachInterrupt(interruptPinStop, stopScanner, RISING);
   attachInterrupt(interruptPinRight, rightScanner, RISING);
   attachInterrupt(interruptPinLeft, leftScanner, RISING);
   attachInterrupt(interruptPinSpeedUp, speedUp, RISING);
   attachInterrupt(interruptPinSpeedDown, speedDown, RISING);
-  attachInterrupt(interruptPinMaxRight, maxRight, RISING);
-  attachInterrupt(interruptPinMaxLeft, maxLeft, RISING);
+  /*attachInterrupt(interruptPinMaxRight, maxRight, RISING);
+  attachInterrupt(interruptPinMaxLeft, maxLeft, RISING);*/
 
   ledcAttachPin(pinMotorPWM, canalPWM0); 
   ledcSetup(canalPWM0, 5000, 8);
 
-  Serial.begin(115200);
   SerialBT.begin("Scanner"); //Bluetooth device name
 }
 
@@ -107,10 +107,9 @@ void loop() {
         sendChar('A');
         motorGoRight();
         mDataScanner.state = RIGHT;
-        lastAction = WANNA_GO_RIGHT;
-        action = NO_ACTION;
+        lastAction = WANNA_GO_RIGHT; 
       }
-
+      action = NO_ACTION;
       break;
       
     case WANNA_GO_LEFT:
@@ -120,9 +119,9 @@ void loop() {
         motorGoLeft(); 
         mDataScanner.state = LEFT;
         lastAction = WANNA_GO_LEFT;
-        action = NO_ACTION;
       }
-
+      
+      action = NO_ACTION;
       break;
       
     case WANNA_STOP:
@@ -132,9 +131,9 @@ void loop() {
         motorStop();
         mDataScanner.state = STOP;
         lastAction = WANNA_STOP;
-        action = NO_ACTION;
       }
-
+      
+      action = NO_ACTION;
       break;
 
     case WANNA_SPEED_UP:
@@ -144,40 +143,52 @@ void loop() {
           refreshSpeed();
           sendChar(intToChar(mDataScanner.mSpeed));
           displayDigit(mDataScanner.mSpeed);
-          action = NO_ACTION;          
+         
         }
-
-    break;
+        
+      action = NO_ACTION; 
+      break;
 
     case WANNA_SPEED_DOWN:
         
         if(mDataScanner.mSpeed > 1){
+          
           mDataScanner.mSpeed--;
           refreshSpeed();
           sendChar(intToChar(mDataScanner.mSpeed));
           displayDigit(mDataScanner.mSpeed);
-          action = NO_ACTION;
         }
-      
-    break;
 
-    case WANNA_MAX_RIGHT:
-
-      mDataScanner.state = MAX_RIGHT;
-      sendChar('D');
-      motorStop();
-      action = NO_ACTION;
-      lastAction = WANNA_MAX_RIGHT;
+      action = NO_ACTION; 
       break;
+
+    /*case WANNA_MAX_RIGHT:
+
+      if (lastMax != LAST_MAX_RIGHT) {
+        mDataScanner.state = MAX_RIGHT;
+        sendChar('D');
+        motorStop();
+        lastAction = WANNA_MAX_RIGHT;
+        lastMax = LAST_MAX_RIGHT;
+      }
+
+      action = NO_ACTION;
+      break;
+    
 
     case WANNA_MAX_LEFT:
 
-      mDataScanner.state = MAX_LEFT;
-      sendChar('E');
-      motorStop();
+      if (lastMax != LAST_MAX_LEFT ){
+        mDataScanner.state = MAX_LEFT;
+        sendChar('E');
+        motorStop();
+        lastAction = WANNA_MAX_LEFT;
+        Serial.print("coucou");
+        lastMax = LAST_MAX_LEFT;
+      }
+      
       action = NO_ACTION;
-      lastAction = WANNA_MAX_LEFT;
-      break;
+      break;*/
 
   }
 
@@ -185,8 +196,6 @@ void loop() {
   if ( SerialBT.available() ) {
     
     messageReceived = (char) SerialBT.read();
-
-    Serial.write(messageReceived);
 
     switch(messageReceived){
 
@@ -206,6 +215,7 @@ void loop() {
       motorStop();
       mDataScanner.state = STOP;
       lastAction = WANNA_STOP;
+      break;
 
     case '1':
       mDataScanner.mSpeed = 1;
@@ -259,25 +269,19 @@ void loop() {
           sendChar('C');
           break;
 
-        case MAX_RIGHT:
+        /*case MAX_RIGHT:
           sendChar('D');
           break;
 
         case MAX_LEFT:
           sendChar('E');
-          break;
+          break;*/
       }      
     }
     
   }
-
-  Serial.print("state :");
-  Serial.println(mDataScanner.state);
-  Serial.print("speed :");
-  Serial.println(mDataScanner.mSpeed);
-  
-  delay(20);
  
+  delay(20);
 }
 
 void motorGoRight(){
@@ -386,6 +390,8 @@ void speedDown(){
   } 
 }
 
+/*
+
 void maxRight() {
   if( millis() - DEBOUNCE_TIME >= debounceTimer){
     debounceTimer = millis();
@@ -400,3 +406,5 @@ void maxLeft() {
     action = WANNA_MAX_LEFT;
   }
 }
+
+*/
